@@ -1,0 +1,15 @@
+{
+  "name": "mwginator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mwgie / TrainsAreAwesome",
+  "license": "MIT",
+  "dependencies": {
+    "ansiescapeapi": "^1.0.3"
+  }
+}
