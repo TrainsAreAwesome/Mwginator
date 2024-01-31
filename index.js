@@ -1,4 +1,7 @@
-import { ldi } from "./assembler.js"
+import { assembledInstructions } from "./assembler.js"
+import { labels } from "./assembler.js"
+import { label } from "./assembler.js"
+import { loadImmidiate } from "./assembler.js"
 import { copy } from "./assembler.js"
 import { add } from "./assembler.js"
 import { sub } from "./assembler.js"
@@ -18,14 +21,16 @@ import { branchNotZero } from "./assembler.js"
 import { branchIfPositive } from "./assembler.js"
 import { branchIfNegative } from "./assembler.js"
 import { returnFromBranch } from "./assembler.js"
+import { halt } from "./assembler.js"
 
 
 export let code = () => {
     //declare variables here, like this let testVar = "<address in binary>"
     //load variables after defining the name and adress
-    let testVar = "1"
+    let value = "1"
     //programme
-    ldi(testVar, "1")
-    add("1", "1", "1")
+   loadImmidiate(value, "1000000000000001")
+   jumpIfPositive("0", value, "11")
+   halt()
 }
 code()
