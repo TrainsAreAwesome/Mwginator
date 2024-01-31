@@ -2,6 +2,7 @@ import { assembledInstructions } from "./assembler.js"
 import { labels } from "./assembler.js"
 import { label } from "./assembler.js"
 import { loadImmidiate } from "./assembler.js"
+import { noOperation } from "./assembler.js"
 import { copy } from "./assembler.js"
 import { add } from "./assembler.js"
 import { sub } from "./assembler.js"
@@ -27,10 +28,14 @@ import { halt } from "./assembler.js"
 export let code = () => {
     //declare variables here, like this let testVar = "<address in binary>"
     //load variables after defining the name and adress
-    let value = "1"
+    let one = "1"
+    let two = "10"
+    let ramAd = "11111111"
+    let content = "1111111111111111"
     //programme
-   loadImmidiate(value, "1000000000000001")
-   jumpIfPositive("0", value, "11")
-   halt()
+    loadImmidiate(one, content)
+    copy(ramAd, one)
+    copy(two, ramAd)
+    halt()
 }
 code()

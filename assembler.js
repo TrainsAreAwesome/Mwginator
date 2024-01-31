@@ -44,6 +44,13 @@ export let label = (name) => { //defines a label, not an actual instruction in t
     labels[`${name}`] = loc.toString(2) //converts current line to binary and adds it to the label list along with name
 }
 
+export let noOperation = () => { //does nothing
+    let str = `${opOrange}000000${wrYellow}00000000${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
+    console.log(str)
+    assembledInstructions.push(str)
+    return str
+}
+
 //----------------------------ALU--------------------------------
 
 export let add = (writeAddress = "0", readA = "0", readB = "0", imediate = "0", imediateBehavour = "01", pointer = "0") => { //adds two numbers together
@@ -202,7 +209,7 @@ export let branch = (readA = "0", imediate = "0", imediateBehavour = "01", point
     imediate = padWithZero(imediate, 16);
     imediateBehavour = padWithZero(imediateBehavour, 2);
     pointer = padWithZero(pointer, 3);
-    let str = `${opOrange}010001${wrYellow}00000000}${raLime}${readA}${rbGreen}00000000${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
+    let str = `${opOrange}010001${wrYellow}00000000${raLime}${readA}${rbGreen}00000000${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
     console.log(str)
     assembledInstructions.push(str)
     return str //return the instruction
@@ -226,7 +233,7 @@ export let branchNotZero = (readA = "0", readB = "0", imediate = "0", imediateBe
     imediate = padWithZero(imediate, 16);
     imediateBehavour = padWithZero(imediateBehavour, 2);
     pointer = padWithZero(pointer, 3);
-    let str = `${opOrange}010101${wrYellow}00000000}${raLime}${readA}${rbGreen}${readB}${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
+    let str = `${opOrange}010101${wrYellow}00000000${raLime}${readA}${rbGreen}${readB}${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
     console.log(str)
     assembledInstructions.push(str)
     return str //return the instruction
@@ -250,7 +257,7 @@ export let branchIfNegative = (readA = "0", readB = "0", imediate = "0", imediat
     imediate = padWithZero(imediate, 16);
     imediateBehavour = padWithZero(imediateBehavour, 2);
     pointer = padWithZero(pointer, 3);
-    let str = `${opOrange}011001${wrYellow}00000000}${raLime}${readA}${rbGreen}${readB}${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
+    let str = `${opOrange}011001${wrYellow}00000000${raLime}${readA}${rbGreen}${readB}${imGrey}${imediate}${ibDBlue}${imediateBehavour}${poLBlue}${pointer}${AEAPI.reset}` //put them all into the instruction
     console.log(str)
     assembledInstructions.push(str)
     return str //return the instruction
