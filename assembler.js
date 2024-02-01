@@ -278,3 +278,30 @@ export let halt = () => { //stops the clock, doesnt reset pc
     assembledInstructions.push(str)
     return str
 }
+
+export let loadReadAPointer = (readA = "0", immidieate = "0") => { //loads the readA adr pointer register
+    readA = padWithZero(readA, 8);
+    immidieate = padWithZero(immidieate, 16);
+    let str = `${opOrange}001000${wrYellow}00000000${raLime}${readA}${rbGreen}00000000${imGrey}${immidieate}${ibDBlue}01${poLBlue}000${AEAPI.reset}`
+    console.log(str);
+    assembledInstructions.push(str);
+    return str;
+}
+
+export let loadReadBPointer = (readA = "0", immidieate = "0") => { //loads the readB adr pointer register
+    readA = padWithZero(readA, 8);
+    immidieate = padWithZero(immidieate, 16);
+    let str = `${opOrange}001001${wrYellow}00000000${raLime}${readA}${rbGreen}00000000${imGrey}${immidieate}${ibDBlue}01${poLBlue}000${AEAPI.reset}`
+    console.log(str);
+    assembledInstructions.push(str);
+    return str;
+}
+
+export let loadWritePointer = (readA = "0", immidieate = "0") => { //loads the write adr pointer register
+    readA = padWithZero(readA, 8);
+    immidieate = padWithZero(immidieate, 16);
+    let str = `${opOrange}001010${wrYellow}00000000${raLime}${readA}${rbGreen}00000000${imGrey}${immidieate}${ibDBlue}01${poLBlue}000${AEAPI.reset}`
+    console.log(str);
+    assembledInstructions.push(str);
+    return str;
+}

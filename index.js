@@ -1,4 +1,4 @@
-import { assembledInstructions } from "./assembler.js"
+import { assembledInstructions, loadReadAPointer, loadReadBPointer, loadWritePointer } from "./assembler.js"
 import { labels } from "./assembler.js"
 import { label } from "./assembler.js"
 import { loadImmidiate } from "./assembler.js"
@@ -28,14 +28,14 @@ import { halt } from "./assembler.js"
 export let code = () => {
     //declare variables here, like this let testVar = "<address in binary>"
     //load variables after defining the name and adress
-    let one = "1"
-    let two = "10"
-    let ramAd = "11111111"
-    let content = "1111111111111111"
+    let valueAdr = "1"
+    let resultAdr = "10"
     //programme
-    loadImmidiate(one, content)
-    copy(ramAd, one)
-    copy(two, ramAd)
+    loadImmidiate(valueAdr, "1")
+    loadWritePointer("", resultAdr)
+    loadReadAPointer("", valueAdr)
+    loadReadBPointer("", valueAdr)
+    add("", "", "", "", "", "111")
     halt()
 }
 code()
