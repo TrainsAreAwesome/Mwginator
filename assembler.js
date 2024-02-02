@@ -305,3 +305,17 @@ export let loadWritePointer = (readA = "0", immidieate = "0") => { //loads the w
     assembledInstructions.push(str);
     return str;
 }
+
+export let resetFrameBuffer = () => { //resets all frame buffers to whatevers on readA
+    let str = `${opOrange}001011${wrYellow}00000000${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
+    console.log(str)
+    assembledInstructions.push(str)
+    return str
+}
+
+export let refreshDisplay = () => { //refreshes the frame buffer
+    let str = `${opOrange}001100${wrYellow}00000000${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
+    console.log(str)
+    assembledInstructions.push(str)
+    return str
+}
