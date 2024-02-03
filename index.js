@@ -28,13 +28,13 @@ import { halt } from "./assembler.js"
 export let code = () => {
     //declare variables here, like this let testVar = "<address in binary>"
     //load variables after defining the name and adress
-    let testAdr = "11111111"
-    let reg1 = "1"
-    let reg2 = "10"
+    let one = "1"
+    let two = "10"
     //programme
-    loadImmidiate(reg1, "1111111111111111")
-    copy(testAdr, reg1)
-    copy(reg2, testAdr)
+    loadReadAPointer("", one)
+    loadReadBPointer("", one)
+    loadWritePointer("", two)
+    add("", "", "", "", "", "111")
     halt()
 }
 code()
