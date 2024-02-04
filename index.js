@@ -22,6 +22,9 @@ import { branchNotZero } from "./assembler.js"
 import { branchIfPositive } from "./assembler.js"
 import { branchIfNegative } from "./assembler.js"
 import { returnFromBranch } from "./assembler.js"
+import { resetFrameBuffer } from "./assembler.js"
+import { refreshDisplay } from "./assembler.js"
+import { refresh7Seg } from "./assembler.js"
 import { halt } from "./assembler.js"
 
 

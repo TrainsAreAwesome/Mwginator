@@ -319,3 +319,10 @@ export let refreshDisplay = () => { //refreshes the frame buffer
     assembledInstructions.push(str)
     return str
 }
+
+export let refresh7Seg = () => { //refreshes the 7seg display
+    let str = `${opOrange}001101${wrYellow}00000000${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
+    console.log(str)
+    assembledInstructions.push(str)
+    return str
+}
