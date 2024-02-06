@@ -1,4 +1,4 @@
-import { assembledInstructions, loadReadAPointer, loadReadBPointer, loadWritePointer } from "./assembler.js"
+import { assembledInstructions, getInput, loadReadAPointer, loadReadBPointer, loadWritePointer } from "./assembler.js"
 import { labels } from "./assembler.js"
 import { label } from "./assembler.js"
 import { loadImmidiate } from "./assembler.js"
@@ -28,16 +28,23 @@ import { refresh7Seg } from "./assembler.js"
 import { halt } from "./assembler.js"
 
 
-export let code = () => {
+export let code = () => { //main function
     //declare variables here, like this let testVar = "<address in binary>"
     //load variables after defining the name and adress
+    //you can also define constant values or numbers in the same way
     let one = "1"
     let two = "10"
-    //programme
-    loadReadAPointer("", one)
-    loadReadBPointer("", one)
-    loadWritePointer("", two)
-    add("", "", "", "", "", "111")
-    halt()
+    let SSeg = "11110000"
+    loadImmidiate(one, "")
+    jump("", "110")
+    label("branched")
+    sub(one, one, "", one, "10")
+    copy(SSeg, one)
+    refresh7Seg()
+    returnFromBranch()
+    label("loop")
+    getInput(two)
+    branchIfPositive("", two, labels.branched, "01")
+    jump("", labels.loop)
 }
 code()

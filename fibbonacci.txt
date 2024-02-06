@@ -1,0 +1,15 @@
+    let one = "1"
+    let currentValue = "1"
+    let lastValue = "10"
+    let buffer = "11"
+    let SSeg = "11110000"
+    //programme
+    loadImmidiate(currentValue, one) //initalise
+    loadImmidiate(lastValue, "0")
+    label("loop")
+    refresh7Seg()
+    add(buffer, currentValue, lastValue)
+    copy(lastValue, currentValue)
+    copy(currentValue, buffer)
+    copy(SSeg, buffer)
+    jump("", labels.loop)

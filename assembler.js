@@ -33,14 +33,14 @@ export let loadImmidiate = (writeAddress, content) => { //loads an immidieate in
 export let copy = (writeAddress, readAddress) => { //copy value between mem adresses, could be ram or register
     writeAddress = padWithZero(writeAddress, 8); //formats to 8 bits long
     readAddress = padWithZero(readAddress, 8); //formats to 8 bits long
-    let str = `${opOrange}000000${wrYellow}${writeAddress}${raLime}${readAddress}${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}` //assembles the instruction
+    let str = `${opOrange}000100${wrYellow}${writeAddress}${raLime}${readAddress}${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}` //assembles the instruction
     console.log(str) //c-logs the instruction
     assembledInstructions.push(str) //adds the instruction to the list of instructions
     return str //reuturns it if you need it
 }
 
 export let label = (name) => { //defines a label, not an actual instruction in the Mwginator
-    let loc = assembledInstructions.length + 1
+    let loc = assembledInstructions.length
     labels[`${name}`] = loc.toString(2) //converts current line to binary and adds it to the label list along with name
 }
 
@@ -322,6 +322,14 @@ export let refreshDisplay = () => { //refreshes the frame buffer
 
 export let refresh7Seg = () => { //refreshes the 7seg display
     let str = `${opOrange}001101${wrYellow}00000000${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
+    console.log(str)
+    assembledInstructions.push(str)
+    return str
+}
+
+export let getInput = (writeAddress) => { //gets an input
+    writeAddress = padWithZero(writeAddress, 8)
+    let str = `${opOrange}001110${wrYellow}${writeAddress}${raLime}00000000${rbGreen}00000000${imGrey}0000000000000000${ibDBlue}00${poLBlue}000${AEAPI.reset}`
     console.log(str)
     assembledInstructions.push(str)
     return str
