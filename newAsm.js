@@ -301,4 +301,3 @@ export let getInput = () => {
     renderInstructions(str)
     assembledInstrucions.push(str)
 }
-code()
