@@ -151,4 +151,154 @@ export let add = (valueA, valueB, writeAddress) => {
     renderInstructions(str)
     assembledInstrucions.push(str)
 }
+
+export let sub = (valueA, valueB, writeAddress) => {
+    let str = getStr(valueA, valueB, writeAddress, 10)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let and = (valueA, valueB, writeAddress) => {
+    let str = getStr(valueA, valueB, writeAddress, 11)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let or = (valueA, valueB, writeAddress) => {
+    let str = getStr(valueA, valueB, writeAddress, 100)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let xor = (valueA, valueB, writeAddress) => {
+    let str = getStr(valueA, valueB, writeAddress, 101)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let lShift = (value, writeAddress) => {
+    let str = getStr(value, 0, writeAddress, 110)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let rShift = (value, writeAddress) => {
+    let str = getStr(value, 0, writeAddress, 111)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+//JUMPING
+export let jump = (adress) => {
+    let str = getStr(adress, 0, 0, 10000)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let jumpIfZero = (adress, value) => {
+    let str = getStr(adress, value, 0, 10010)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let jumpNotZero = (adress, value) => {
+    let str = getStr(adress, value, 0, 10100)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let jumpIfPositive = (adress, value) => {
+    let str = getStr(adress, value, 0, 10110)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let jumpIfNegative = (adress, value) => {
+    let str = getStr(adress, value, 0, 11000)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+//BRANCHING
+export let branch = (adress) => {
+    let str = getStr(adress, 0, 0, 10001)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let branchIfZero = (adress, value) => {
+    let str = getStr(adress, value, 0, 10011)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let branchNotZero = (adress, value) => {
+    let str = getStr(adress, value, 0, 10101)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let branchIfPositive = (adress, value) => {
+    let str = getStr(adress, value, 0, 10111)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let branchIfNegative = (adress, value) => {
+    let str = getStr(adress, value, 0, 11001)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let returnFromBranch = () => {
+    let str = getStr(0, 0, 0, 11011)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+//OTHER
+export let halt = () => {
+    let str = getStr(0, 0, 0, 111111)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let loadReadAPointer = (adress) => {
+    let str = getStr(adress, 0, 0, 1000)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let loadReadBPointer = (adress) => {
+    let str = getStr(adress, 0, 0, 1001)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let loadWritePointer = (adress) => {
+    let str = getStr(adress, 0, 0, 1010)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let resetFrameBuffer = () => {
+    let str = getStr(0, 0, 0, 1011)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let refreshDisplay = () => {
+    let str = getStr(0, 0, 0, 1100)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let refresh7Seg = () => {
+    let str = getStr(0, 0, 0, 1101)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
+
+export let getInput = () => {
+    let str = getStr(0, 0, 0, 1110)
+    renderInstructions(str)
+    assembledInstrucions.push(str)
+}
 code()
