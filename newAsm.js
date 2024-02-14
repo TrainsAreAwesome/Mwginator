@@ -1,4 +1,3 @@
-import { text } from "express"
 import { code } from "./index.js" //importing the assembly
 import * as AEAPI from "ansiescapeapi" //importing the colour stuff
 let opOrange = AEAPI.BRGB(255, 127, 39) //defining the colours
@@ -12,6 +11,7 @@ let textColour = AEAPI.RGB(0, 0, 0)
 
 export let assembledInstrucions = []
 export let labels = {}
+export let stringInstruction = "" //a string thats just all of the binary in one
 
 let padWithZero = (value, amount) => { //pads the left hand side of a string with a zero, so you dont have to yourself
     while (value.length < amount) {
@@ -117,7 +117,19 @@ export let renderInstructions = (instruction) => {
     commandConstruct += imGrey + instruction.immidiate
     commandConstruct += ibDBlue + instruction.immidiateBehavour
     commandConstruct += poLBlue + instruction.pointer
-    AEAPI.printProsscedString(commandConstruct)
+    //AEAPI.printProsscedString(commandConstruct)
+}
+
+let addToString = (str) => {
+    let rstr = ""
+    rstr += str.opcode
+    rstr += str.writeAddress
+    rstr += str.readA
+    rstr += str.readB
+    rstr += str.immidiate
+    rstr += str.immidiateBehavour
+    rstr += str.pointer
+    return rstr
 }
 
 //FAKE INSTRUCTIONS
@@ -125,23 +137,27 @@ export let loadImmidiate = (writeAddress = 0, content = 0) => {
     let str = getStr(0, 0, padWithZero(writeAddress, 8), 0, content)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let copy = (from = 0, to = 0) => {
     let str = getStr(from, 0, to, 100)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let label = (name) => {
     let loc = assembledInstrucions.length
     labels[name] = loc.toString(2)
+    labels[name] = Number(labels[name])
 }
 
 export let noOperation = () => {
     let str = getStr()
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 //ALU
@@ -150,154 +166,180 @@ export let add = (valueA, valueB, writeAddress) => {
     let str = getStr(valueA, valueB, writeAddress, 1)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let sub = (valueA, valueB, writeAddress) => {
     let str = getStr(valueA, valueB, writeAddress, 10)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let and = (valueA, valueB, writeAddress) => {
     let str = getStr(valueA, valueB, writeAddress, 11)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let or = (valueA, valueB, writeAddress) => {
     let str = getStr(valueA, valueB, writeAddress, 100)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let xor = (valueA, valueB, writeAddress) => {
     let str = getStr(valueA, valueB, writeAddress, 101)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let lShift = (value, writeAddress) => {
     let str = getStr(value, 0, writeAddress, 110)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let rShift = (value, writeAddress) => {
     let str = getStr(value, 0, writeAddress, 111)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 //JUMPING
 export let jump = (adress) => {
     let str = getStr(adress, 0, 0, 10000)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let jumpIfZero = (adress, value) => {
     let str = getStr(adress, value, 0, 10010)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let jumpNotZero = (adress, value) => {
     let str = getStr(adress, value, 0, 10100)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let jumpIfPositive = (adress, value) => {
     let str = getStr(adress, value, 0, 10110)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let jumpIfNegative = (adress, value) => {
     let str = getStr(adress, value, 0, 11000)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 //BRANCHING
 export let branch = (adress) => {
     let str = getStr(adress, 0, 0, 10001)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let branchIfZero = (adress, value) => {
     let str = getStr(adress, value, 0, 10011)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let branchNotZero = (adress, value) => {
     let str = getStr(adress, value, 0, 10101)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let branchIfPositive = (adress, value) => {
     let str = getStr(adress, value, 0, 10111)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let branchIfNegative = (adress, value) => {
     let str = getStr(adress, value, 0, 11001)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let returnFromBranch = () => {
     let str = getStr(0, 0, 0, 11011)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 //OTHER
 export let halt = () => {
     let str = getStr(0, 0, 0, 111111)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let loadReadAPointer = (adress) => {
     let str = getStr(adress, 0, 0, 1000)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let loadReadBPointer = (adress) => {
     let str = getStr(adress, 0, 0, 1001)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let loadWritePointer = (adress) => {
     let str = getStr(adress, 0, 0, 1010)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
-export let resetFrameBuffer = () => {
-    let str = getStr(0, 0, 0, 1011)
+export let resetFrameBuffer = (value) => {
+    let str = getStr(value, 0, 0, 1011)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let refreshDisplay = () => {
     let str = getStr(0, 0, 0, 1100)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let refresh7Seg = () => {
     let str = getStr(0, 0, 0, 1101)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
 
 export let getInput = () => {
     let str = getStr(0, 0, 0, 1110)
     renderInstructions(str)
     assembledInstrucions.push(str)
+    stringInstruction+= addToString(str)
 }
