@@ -13,6 +13,15 @@ export let assembledInstrucions = []
 export let labels = {}
 export let stringInstruction = "" //a string thats just all of the binary in one
 
+export let saveBin = () => {
+    let finishedString = "";
+    for(let i = 0; i < assembledInstrucions.length; ++i){
+        finishedString+= addToString(assembledInstrucions[i])
+        finishedString+= "\n"
+    }
+    console.log(finishedString)
+}
+
 let padWithZero = (value, amount) => { //pads the left hand side of a string with a zero, so you dont have to yourself
     while (value.length < amount) {
         value = "0" + value
@@ -20,7 +29,7 @@ let padWithZero = (value, amount) => { //pads the left hand side of a string wit
     return value
 }
 
-let isVar = (value) => {
+export let isVar = (value) => {
     if (value === undefined || value === null) {
         throw console.error("value is", typeof (value));
     }
@@ -337,8 +346,8 @@ export let refresh7Seg = () => {
     stringInstruction+= addToString(str)
 }
 
-export let getInput = () => {
-    let str = getStr(0, 0, 0, 1110)
+export let getInput = (writeAddress) => {
+    let str = getStr(0, 0, writeAddress, 1110)
     renderInstructions(str)
     assembledInstrucions.push(str)
     stringInstruction+= addToString(str)

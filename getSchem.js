@@ -93,8 +93,8 @@ while(romLoc < binary.length){ //runs for each instruction in the binary
             throw("Too many instructions in programme! Cant fit in ROM!") //error out
         } //otherwise
         currentX = 0 //reset the x offset
-        for(i = 0; i < 5; ++i){ //and add 9 to the z offset to go to the next rom "stick"
-            currentZ[i] = currentZ + 9
+        for(let i = 0; i < 5; ++i){ //and add 9 to the z offset to go to the next rom "stick"
+            currentZ[i] = currentZ[i] + 9
         }
     }
 
