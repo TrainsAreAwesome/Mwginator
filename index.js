@@ -1,5 +1,5 @@
 import { getSchematic } from "./getschem.js"
-import { assembledInstrucions, labels } from "./newAsm.js"
+import { assembledInstrucions, labels, renderInstructions } from "./newAsm.js"
 import { label } from "./newAsm.js"
 import { loadImmidiate } from "./newAsm.js"
 import { copy } from "./newAsm.js"
@@ -51,171 +51,167 @@ export let display = [
     "11111111"
 ]
 
+let inputs = { //stores the bitmasks for each input
+    toggles: {
+        one: 1,
+        two: 10,
+        three: 100,
+        four: 1000
+    },
+
+    rightDPad: {
+        right: 10000,
+        down: 100000,
+        left: 1000000,
+        up: 10000000
+    },
+
+    leftDPad: {
+        right: 100000000,
+        down: 1000000000,
+        left: 10000000000,
+        up: 100000000000
+    }
+}
+
 export let code = () => { //main function and entry point for the assembler, put your code inside it
-    //"Variables": let name = "<adress>"
-    //Immediates to use later: let name = <number>
+    //Variables: let <name> = "<adress>"
+    //Immediates to use later: const <name> = <number>
+    //dont name a variable pointer or 0pointer bc that will mess things up
     
-    let ball = {
-        yPos: "01",
-        xPos: "10",
-        yVel: "11",
-        xVel: "100"
+    //vars and consts
+    let temp = "1"
+    let temp2 = "10"
+    let cursor = {
+        yPos: "11",
+        xPos: "100"
     }
-    let paddle = {
-        left: "101",
-        right: "110"
-    }
-    let temp = "111"
-    let temp2 = "1000"
+
+    let input = "101"
+    let returnValue = "110"
+    let currentLine = "111"
+    let currentImageOffset = "1000"
+    let loopCounter = "1001"
+    let currentDisplayLine = "1010"
+    let cursorColour = "1011"
+
+    let displayOffset = 11110001
 
     //INIT
-    loadImmidiate(ball.xPos, 11111000)
-    loadImmidiate(ball.yPos, 100000000)
-    loadImmidiate(ball.yVel, 1) //THIS IS A TEST
-    loadImmidiate(ball.xVel, 1) //MOVES BALL LEFT ON STARTUP SO THE BALL ACTUALLY MOVES CHANGE IMMIEDIATE TO 1 AFTER TESTING
-    loadImmidiate(paddle.left, 1110000000)
-    loadImmidiate(paddle.right, 1110000000)
+    loadImmidiate(temp, 0)
+    loadImmidiate(temp2, 0)
+    loadImmidiate(cursor.yPos, 10000000)
+    loadImmidiate(cursor.xPos, 11111000)
+    loadImmidiate(input, 0)
+    loadImmidiate(returnValue, 0)
+    loadImmidiate(currentLine, 0)
+    loadImmidiate(currentImageOffset, 10000)
+    loadImmidiate(cursorColour, 0)
+    jump(110100) //to current line
 
-    jump(1001110)
 
-    //workaround to implement conditional subroutine returns
+    //conditional branch return
     label("returnFromBranch")
     returnFromBranch()
 
-    //this is triggerd when someone loses
-    label("gameOver")
-    loadImmidiate(temp, 11111111) //loads 255 to seven seg, couldnt think of anything better to do if you loose, its 1 am
-    copy(temp, sevenSeg)
-    refresh7Seg()
-    halt()
+    label("renderCursor") //renders the cursor and refreshes the display
 
-    //paddle moving
-    label("moveRightPaddleDown")
-    sub(paddle.right, 111, temp2)
-    jumpIfZero(labels.returnFromBranch, temp2)
-    rShift(paddle.right, paddle.right)
-    returnFromBranch()
+        loadReadAPointer(cursor.xPos) //load pointers
+        loadWritePointer(cursor.xPos)
 
-    label("moveLeftPaddleDown")
-    sub(paddle.left, 111, temp2)
-    jumpIfZero(labels.returnFromBranch, temp2)
-    rShift(paddle.left, paddle.left)
+        copy("pointer", temp) //copy the screen column that the cursors in into temp
+
+        xor(cursorColour, 1111111111111111, cursorColour) //inverts the cursor colour so it flashes so you can see it
+
+        and(cursor.yPos, cursorColour, temp2) //flashes the cursor
+
+        xor(temp2, temp, temp) //xor the correctly coloured cursor with the rendered drawing (merge them, also if the pixel in the drawing is white it will flash black)
+        copy(temp, "pointer") //copy the mergerd column back into the frame buffer
+
+
+        refreshDisplay()
     returnFromBranch()
 
-    label("moveRightPaddleUp")
-    sub(paddle.right, 1110000000000000, temp2)
-    jumpIfZero(labels.returnFromBranch, temp2)
-    lShift(paddle.right, paddle.right)
-    returnFromBranch()
-    
-    label("moveLeftPaddleUp")
-    sub(paddle.left, 1110000000000000, temp2)
-    jumpIfZero(labels.returnFromBranch, temp2)
-    lShift(paddle.left, paddle.left)
+
+
+    //moving the cursor
+    label("moveCursorRight")
+        sub(cursor.xPos, 1, cursor.xPos)
     returnFromBranch()
 
-    //paddle input
-    label("updatePaddle")
-    getInput(temp)
-    and(temp, 1, temp2)
-    branchIfPositive(labels.moveRightPaddleDown, temp2)
-    and(temp, 10, temp2)
-    branchIfPositive(labels.moveLeftPaddleDown, temp2)
-    and(temp, 100, temp2)
-    branchIfPositive(labels.moveRightPaddleUp, temp2)
-    and(temp, 1000, temp2)
-    branchIfPositive(labels.moveLeftPaddleUp, temp2)
+    label("moveCursorLeft")
+        add(cursor.xPos, 1, cursor.xPos)
     returnFromBranch()
 
-    //call here to move the ball, say on a ball update
-    label("moveBallUp") //moves ball up
-    lShift(ball.yPos, ball.yPos)
+    label("moveCursorUp")
+        lShift(cursor.yPos, cursor.yPos)
     returnFromBranch()
 
-    label("moveBallDown") //moves ball down
-    rShift(ball.yPos, ball.yPos)
+    label("moveCursorDown")
+        rShift(cursor.yPos, cursor.yPos)
     returnFromBranch()
 
-    label("moveBallLeft") //moves ball left
-    add(ball.xPos, 1, ball.xPos)
+
+
+    //getting cursor inputs and moving it accordingly
+    label("moveCursor")
+        getInput(input) //capture user input
+        
+        and(input, inputs.leftDPad.right, temp) //if move right, move right
+        branchIfPositive(labels.moveCursorRight, temp)
+
+        and(input, inputs.leftDPad.left, temp) //if move left, move left
+        branchIfPositive(labels.moveCursorLeft, temp)
+
+        and(input, inputs.leftDPad.down, temp) //if move down, move down
+        branchIfPositive(labels.moveCursorDown, temp)
+
+        and(input, inputs.leftDPad.up, temp) //if move up, move up
+        branchIfPositive(labels.moveCursorUp, temp)
+
     returnFromBranch()
 
-    label("moveBallRight") //moves ball right
-    sub(ball.xPos, 1, ball.xPos)
-    returnFromBranch()
 
-    //changing ball velocity
-    label("bounceBallUp")
-    loadImmidiate(ball.yVel, 1)
-    returnFromBranch()
 
-    label("bounceBallDown")
-    loadImmidiate(ball.yVel, 1000000000000000)
-    returnFromBranch()
 
-    label("bounceBallLeft")
-    loadImmidiate(ball.xVel, 1)
-    returnFromBranch()
 
-    label("bounceBallRight")
-    loadImmidiate(ball.xVel, 1000000000000000)
-    returnFromBranch()
-
-    //collision with floor and cieling
-    label("checkNonPaddleCollision")
-    sub(ball.yPos, 1, temp) //if ball is at the bottom of the screen (bouncing with floor)
-    branchIfZero(labels.bounceBallUp, temp) //then make it move up instead
-    branchIfNegative(labels.bounceBallDown, ball.yPos) //if ball is at top of screen (bouncing with cieling) then make it bounce down
-    returnFromBranch()
-
-    //collision with paddles
-    label("checkLeftPaddleCollision")
-    and(paddle.left, ball.yPos, temp) //checks if the ball and paddle collide
-    jumpIfZero(labels.gameOver, temp) //if they dont, the games over
-    loadImmidiate(ball.xVel, 1000000000000000) //otherwise the ball will move right
-    returnFromBranch()
-
-    label("checkRightPaddleCollision")
-    and(paddle.right, ball.yPos, temp) //checks if the ball and paddle collide
-    jumpIfZero(labels.gameOver, temp) //if they dont then the game is over
-    loadImmidiate(ball.xVel, 1) //otherwise set the ball to move left
-    returnFromBranch()
-
-    //move ball based on current velocity. run this *AFTER* collision checks are done on the ball
-    label("updateBall")
-    branchIfPositive(labels.moveBallUp, ball.yVel) //if the velocity for the ball on the y direction is posotive, move it up
-    branchIfNegative(labels.moveBallDown, ball.yVel) //if the velocity for the ball on the y direction is negative, move it down
-    branchIfPositive(labels.moveBallLeft, ball.xVel) //if the velocity for the ball on the x direction is posotive, move it left (left is posotive and right is negative bc of the way the display addreses are set ip)
-    branchIfNegative(labels.moveBallRight, ball.xVel) //if the velocity for the ball on the x direction is negative, move it left
-    returnFromBranch()
 
     //render
     label("render")
-    resetFrameBuffer() //resets the frame buffer so the ball doesnt leave a trail
-    loadWritePointer(ball.xPos) //load the xpos (screen adress) to the write pointer to write the ball there
-    copy(ball.yPos, "pointer") //load the ball to the pointer
-    copy(paddle.right, display[0]) //copy right paddle to frame buffer
-    copy(paddle.left, display[14]) //copy left paddle to frame buffer
-    refreshDisplay() //refresh the frame buffer
-    returnFromBranch() //return/close function
+        resetFrameBuffer()
+        loadImmidiate(currentDisplayLine, displayOffset)
+        loadImmidiate(loopCounter, 0)
+        copy(currentImageOffset, currentLine)
 
-    //main loop
-    console.log(assembledInstrucions.length)
-    label("loop")
-    branch(labels.updatePaddle) //updates paddle pos
-    branch(labels.checkNonPaddleCollision) //checks ball collision with floor and cieling
-    
-    //checking if paddle collision needs to be checked
-    sub(ball.xPos, 11111110, temp) //if the ball is at the second most left point on the screen
-    branchIfZero(labels.checkLeftPaddleCollision, temp) //if so check left paddle collision
-    sub(ball.xPos, 11110010, temp) //if the ball is at the second most right point of the screen
-    branchIfZero(labels.checkRightPaddleCollision, temp) //if so check right paddle collision
 
-    branch(labels.updateBall) //moves the ball according to its set velocity
-    branch(labels.render) //renders everything to screen
-    jump(labels.loop) //loops back to the start of the main loop
+
+
+        label("renderLoop")
+            loadReadAPointer(currentLine)
+            loadWritePointer(currentDisplayLine)
+
+            copy("pointer", temp2)
+            copy(temp2, "pointer")
+            
+
+            add(currentLine, 1, currentLine)
+            add(loopCounter, 1, loopCounter)
+            add(currentDisplayLine, 1, currentDisplayLine)
+
+            sub(loopCounter, 1111, temp2)
+            jumpIfZero(labels.renderCursor, temp2)
+            jump(labels.renderLoop)
+
+
+    //main
+    label("main")
+        console.log(assembledInstrucions.length)
+        branch(labels.moveCursor)
+        branch(labels.render)
+        jump(labels.main)
+
 
 }
-code()
-getSchematic()
-saveBin()
+code() //runs through your asm code and assembles it
+getSchematic() //turns it into a schematic
+saveBin() //nothing atm

@@ -44,7 +44,6 @@ let getStr = (valueA = 0, valueB = 0, writeAddress = 0, opcode = 0, writeback) =
     let immidiateUsed = false
 
     strObj.opcode = padWithZero(opcode.toString(), 6) //EXPAND THE OPCODE TO 6 BITS
-    console.log(strObj.opcode)
     if (valueA) { //if valueA defined
         if (valueA === "0pointer" || valueA === "pointer") { //if its a pointer
             strObj.readA = "00000000" //set the read add to 0

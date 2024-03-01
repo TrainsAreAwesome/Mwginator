@@ -1,0 +1,252 @@
+    let movingPeiceArray = [ //the array which holds the moving peices so they can get moved down and around
+        "11100001",
+        "11100010",
+        "11100011",
+        "11100100",
+        "11100101",
+        "11100110",
+        "11100111",
+        "11101000",
+        "11101001",
+        "11101010",
+        "11101011",
+        "11101100",
+        "11101101",
+        "11101110",
+        "11101111"
+    ]
+
+    let staticPeiceArray = [ //the array which holds the static peices, for collision detection and line clearing
+        "11000001",
+        "11000010",
+        "11000011",
+        "11000100",
+        "11000101",
+        "11000110",
+        "11000111",
+        "11001000",
+        "11001001",
+        "11001010",
+        "11001011",
+        "11001100",
+        "11001101",
+        "11001110",
+        "11001111"
+    ]
+
+    //init
+    let pieces = { //holds the pieces and their rotational variants
+        line: [
+            [ //standng up
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,    
+                0,
+                1111000000000000,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ],
+            [ //lying down
+                0,
+                0,
+                0,
+                0,
+                0, //sorry i coulnt fill all the zeros in, js complains
+                0,
+                1000000000000000,
+                1000000000000000,
+                1000000000000000,
+                1000000000000000,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+        ],
+        l: [
+
+        ]
+    }
+    
+    
+    let randomNumber = "1" //a random number
+    let newBit = "10" //the next bit
+    let temp = "11" //a temp var
+    let temp2 = "100" //another general temp var
+    let counter = "101" //where loops store their counters
+    let currentStaticPieceAddress = "110" //stores a pointer to the current static piece to work on
+    let currentStaticPiece = "111" //register where the current static line is stored
+    let currentMovingPieceAddress = "1000" //stores a pointer to the current moving peice to work on
+    let currentMovingPiece = "1001" //register where the current moving line is stored
+    let returnValue = "1010" //the place for "functions" to store their return values
+    let currentDisplayAdress = "1011" //used in the renderer to know where to render to
+
+
+    //INIT
+    resetFrameBuffer()
+    refreshDisplay()
+    loadImmidiate(randomNumber, 1) //the immediate is the seed for the random number generator
+    loadImmidiate(returnValue, 1) //sets the return value to 1 to get the game to give you a new piece on startup
+    jump(1010100) //jump to main
+    
+    label("returnFalse") //computer engineers hate him! get conditional branch returns with this simple trick!
+        loadImmidiate(returnValue, 0)
+    returnFromBranch()
+
+    label("returnTrue")
+        loadImmidiate(returnValue, 1)
+    returnFromBranch()
+
+    label("reuturnNull") //this doesnt change the return value
+    returnFromBranch()
+
+
+    label("stopFallingCheck") //checks to see if a piece should stop falling (will clip into static pieces next time it falls)
+        loadImmidiate(currentMovingPieceAddress, movingPeiceArray[0]) //resetting the adress pointers and loop counter
+        loadImmidiate(currentStaticPieceAddress, staticPeiceArray[0])
+        loadImmidiate(counter, 0)
+
+        label("stopFallingPieceCheckLoop") //where to loop to
+            loadReadAPointer(currentMovingPieceAddress)
+            copy("pointer", currentMovingPiece) //loading the current moving piece into registers
+
+            loadReadAPointer(currentStaticPieceAddress)
+            copy("pointer", currentStaticPiece) //loading the current static piece into registers
+
+            rShift(currentMovingPiece, currentMovingPiece) //moving the moving piece down one to see it it clips with the static piece
+            and(currentMovingPiece, currentStaticPiece, temp) //checking collision
+            jumpIfPositive(labels.returnTrue) //if they collide, return true
+
+            and(currentMovingPiece, 1, temp) //if piece is hitting the bottom, return true
+            jumpIfPositive(labels.returnTrue)
+          
+            add(currentMovingPieceAddress, 1, currentMovingPieceAddress) //incrementing the pointers adresses
+            add(currentStaticPieceAddress, 1, currentStaticPieceAddress)
+
+            add(counter, 1, counter) //incrementing the counter
+            sub(counter, 1111, temp) //if counter is 15
+            jumpIfZero(labels.returnFalse, temp) //return false (reached end of collision checking withough any collision)
+            jump(labels.stopFallingPieceCheckLoop) //otherwise loop again
+
+
+    label("copyPiece") //moves the current movingPiece to the current staticPiece
+        loadImmidiate(currentMovingPieceAddress, movingPeiceArray[0]) //reset the pointers
+        loadImmidiate(currentStaticPieceAddress, staticPeiceArray[0])
+        loadImmidiate(counter, 0)
+
+        label("copyPieceLoop") //where to loop from
+            loadWritePointer(currentStaticPieceAddress) //refresh the write pointer to the current static piece adress
+
+            loadReadAPointer(currentMovingPieceAddress) //load the static and moving pieces
+            copy("pointer", currentMovingPiece)
+
+            loadReadAPointer(currentStaticPieceAddress)
+            copy("pointer", currentStaticPiece)
+
+            or(currentMovingPiece, currentStaticPiece, currentStaticPiece) //merge the static and moving piece together
+            copy(currentStaticPiece, "pointer")  //copy it back
+
+            add(counter, 1, counter) //increment the counter
+            add(currentMovingPieceAddress, 1, currentMovingPieceAddress) //increment the pointers
+            add(currentMovingPieceAddress, 1, currentStaticPieceAddress)
+
+            sub(counter, 1111, temp) //if counter is 15 then exit else loop again
+            jumpIfZero(labels.returnNull, temp)
+            jump(labels.copyPieceLoop)
+
+
+    label("movePieceDown") //moves a piece down
+        loadImmidiate(currentMovingPieceAddress, movingPeiceArray[0]) //reset piece adress pointers
+        loadImmidiate(counter, 0)
+
+        label("movePieceDownLoop")
+            loadWritePointer(currentMovingPieceAddress) //load current piece adress to write pointer
+
+            loadReadAPointer(currentMovingPieceAddress) //load the current piece
+            copy("pointer", currentMovingPiece)
+
+            rShift(currentMovingPiece, currentMovingPiece) //move it down
+            copy(currentMovingPiece, "pointer") //save it back to ram
+
+            add(counter, 1, counter) //increment counter
+
+            add(currentMovingPieceAddress, 1, currentMovingPieceAddress) //increment pointers
+            add(currentStaticPieceAddress, 1, currentStaticPieceAddress)
+
+            sub(counter, 1111, temp) //if counter is 15 then reuturn else loop again
+            jumpIfZero(labels.returnFalse, temp)
+            jump(labels.movePieceDownLoop)
+
+
+
+
+    label("getNewPiece")
+        loadImmidiate(currentMovingPieceAddress, movingPeiceArray[0])
+        loadImmidiate(counter, 0)
+        
+        label("getNewPieceLoop")
+            loadWritePointer(currentMovingPieceAddress) //update the pointer
+
+            loadImmidiate("pointer", 1000000000000000) //save back a temp block
+
+            add(counter, 1, counter) //increment the counter
+
+            add(currentMovingPieceAddress, 1, currentMovingPieceAddress) //increment the adress pointer
+
+            sub(counter, 1111, temp) //if counter is 15 then return else loop again
+            jumpIfZero(labels.returnNull, temp)
+            jump(labels.getNewPieceLoop)
+
+
+
+
+
+
+    label("render")
+        loadImmidiate(currentMovingPieceAddress, movingPeiceArray[0]) //init for the "renderer"
+        loadImmidiate(currentStaticPieceAddress, staticPeiceArray[0])
+        loadImmidiate(currentDisplayAdress, display[0])
+        loadImmidiate(counter, 0)
+
+        label("renderLoop")
+            loadWritePointer(currentDisplayAdress) //set the write adress of the renderer to the current line on screen
+
+            loadReadAPointer(currentMovingPieceAddress) //load the adress for the current moving piece
+            copy("pointer", currentMovingPiece)
+
+            loadReadAPointer(currentStaticPieceAddress) //load the adress for the current static piece
+            copy("pointer", currentStaticPiece)
+
+            or(currentMovingPiece, currentStaticPiece, temp) //merge the static and moving pieces together
+            copy(temp, "pointer") //copy them to the frame buffer
+
+            add(counter, 1, counter) //increment the counter
+            add(currentDisplayAdress, 1, currentDisplayAdress) //increment the pointers
+            add(currentMovingPieceAddress, 1, currentMovingPieceAddress)
+            add(currentStaticPieceAddress, 1, currentStaticPieceAddress)
+
+            sub(counter, 1111, temp) //if counter is 15 return 0, else loop again
+            jumpIfZero(labels.returnFalse)
+            jump(labels.renderLoop)
+
+
+    
+    console.log(assembledInstrucions.length)
+    label("main") //main game loop
+    branch(labels.stopFallingCheck)
+    branchIfPositive(labels.copyPiece, returnValue) //if collision then copy the moving piece into the static pieces
+    //check for lines here //if the static pieces board changed (if there was a collision) then check for line clears
+    branchIfPositive(labels.getNewPiece, returnValue) //if there was a collision (no moving piece anymore) then get a new one
+    branchIfNegative(labels.movePieceDown, returnValue) //if there wasnt collision, move the piece down
+    branch(labels.render)
+    refreshDisplay()
+    jump(labels.main)

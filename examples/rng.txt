@@ -1,0 +1,28 @@
+    //RANDOM NUMBER GEN TEST
+    let state = "1" //the number
+    let newBit = "10" //the next bit
+    let temp = "11" //a temp var
+    //init
+    loadImmidiate(state, 1001010011010110) //the immediate is the seed
+    jump(111) //to main loop
+    
+    label("moveBit")
+    loadImmidiate(newBit, 1000000000000000)
+    returnFromBranch()
+
+    label("display")
+    copy(state, sevenSeg)
+    refresh7Seg()
+    returnFromBranch()
+
+    console.log(assembledInstrucions.length)
+    label("main")
+    loadImmidiate(newBit, 0)
+    rShift(state, temp)
+    xor(state, temp, temp)
+    and(temp, 1, temp)
+    branchIfPositive(labels.moveBit, temp)
+    rShift(state, state)
+    or(newBit, state, state)
+    branch(labels.display)
+    jump(labels.main)
