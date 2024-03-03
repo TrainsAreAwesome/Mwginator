@@ -149,14 +149,15 @@ returnFromBranch() //return/close function
 //main loop
 console.log(assembledInstrucions.length)
 label("loop")
-    branch(labels.updatePaddle) //updates paddle pos
-    branch(labels.checkNonPaddleCollision) //checks ball collision with floor and cieling
+branch(labels.checkNonPaddleCollision) //checks ball collision with floor and cieling
 
 //checking if paddle collision needs to be checked
     sub(ball.xPos, 11111110, temp) //if the ball is at the second most left point on the screen
     branchIfZero(labels.checkLeftPaddleCollision, temp) //if so check left paddle collision
     sub(ball.xPos, 11110010, temp) //if the ball is at the second most right point of the screen
     branchIfZero(labels.checkRightPaddleCollision, temp) //if so check right paddle collision
+    
+    branch(labels.updatePaddle) //updates paddle pos
 
     branch(labels.updateBall) //moves the ball according to its set velocity
     branch(labels.render) //renders everything to screen

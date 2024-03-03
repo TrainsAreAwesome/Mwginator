@@ -94,216 +94,171 @@ export let code = () => { //main function and entry point for the assembler, put
     //Variables: let <name> = "<adress>"
     //Immediates to use later: const <name> = <number>
     //dont name a variable pointer or 0pointer bc that will mess things up
-    
-    //vars and consts
-    let temp = "1"
-    let temp2 = "10"
-    let cursor = {
-        yPos: "11",
-        xPos: "100"
-    }
 
-    let input = "101"
-    let returnValue = "110"
-    let currentLine = "111"
-    let currentImageOffset = "1000"
-    let loopCounter = "1001"
-    let currentDisplayLine = "1010"
-    let cursorColour = "1011"
-    let oldInput = "1100"
+//THIS ISNT A SCHEMATIC TO PASTE IN. THIS IS THE ASM CODE I USED TO GENERATE IT, SO YOU CAN MODIFY IT YORSELF 
+let ball = {
+    yPos: "01",
+    xPos: "10",
+    yVel: "11",
+    xVel: "100"
+}
+let paddle = {
+    left: "101",
+    right: "110"
+}
+let temp = "111"
+let temp2 = "1000"
 
-    let displayOffset = 11110000
-    let originalImageOffset = 10001
+//INIT
+loadImmidiate(ball.xPos, 11111000)
+loadImmidiate(ball.yPos, 100000000)
+loadImmidiate(ball.yVel, 1) //Sets the ball to move up when the game starts
+loadImmidiate(ball.xVel, 1) //Sets the ball to move left when the game starts
+loadImmidiate(paddle.left, 1110000000)
+loadImmidiate(paddle.right, 1110000000)
 
-    //INIT
-    loadImmidiate(temp, 0) //resetting all the needed registers so preivous programmes dont mess things up
-    loadImmidiate(temp2, 0)
-    loadImmidiate(cursor.yPos, 10000000)
-    loadImmidiate(cursor.xPos, 11111000)
-    loadImmidiate(input, 0)
-    loadImmidiate(returnValue, 0)
-    loadImmidiate(currentLine, 0)
-    loadImmidiate(currentImageOffset, 10001) //auto loads image 0
-    loadImmidiate(cursorColour, 0)
-    jump(1011101) //to current line
+jump(1001110) //Jumps to the main loop
 
+//workaround to implement conditional subroutine returns
+label("returnFromBranch")
+returnFromBranch()
 
-    //conditional branch return
-    label("returnFromBranch")
-    returnFromBranch()
+//this is triggerd when someone loses
+label("gameOver")
+    loadImmidiate(temp, 11111111) //loads 255 to seven seg, couldnt think of anything better to do if you loose, its 1 am
+    copy(temp, sevenSeg)
+    refresh7Seg()
+halt()
 
-    label("renderCursor") //renders the cursor and refreshes the display
+//paddle moving
+label("moveRightPaddleDown")
+    sub(paddle.right, 111, temp2)
+    jumpIfZero(labels.returnFromBranch, temp2)
+    rShift(paddle.right, paddle.right)
+returnFromBranch()
 
-        loadReadAPointer(cursor.xPos) //load pointers
-        loadWritePointer(cursor.xPos)
+label("moveLeftPaddleDown")
+    sub(paddle.left, 111, temp2)
+    jumpIfZero(labels.returnFromBranch, temp2)
+    rShift(paddle.left, paddle.left)
+returnFromBranch()
 
-        copy("pointer", temp) //copy the screen column that the cursors in into temp
+label("moveRightPaddleUp")
+    sub(paddle.right, 1110000000000000, temp2)
+    jumpIfZero(labels.returnFromBranch, temp2)
+    lShift(paddle.right, paddle.right)
+returnFromBranch()
 
-        xor(cursorColour, 1111111111111111, cursorColour) //inverts the cursor colour so it flashes so you can see it
+label("moveLeftPaddleUp")
+    sub(paddle.left, 1110000000000000, temp2)
+    jumpIfZero(labels.returnFromBranch, temp2)
+    lShift(paddle.left, paddle.left)
+returnFromBranch()
 
-        and(cursor.yPos, cursorColour, temp2) //flashes the cursor
+//paddle input
+label("updatePaddle")
+    getInput(temp)
+    and(temp, inputs.rightDPad.down, temp2)
+    branchIfPositive(labels.moveRightPaddleDown, temp2)
 
-        xor(temp2, temp, temp) //xor the correctly coloured cursor with the rendered drawing (merge them, also if the pixel in the drawing is white it will flash black)
-        copy(temp, "pointer") //copy the mergerd column back into the frame buffer
+    and(temp, inputs.leftDPad.down, temp2)
+    branchIfPositive(labels.moveLeftPaddleDown, temp2)
 
+    and(temp, inputs.rightDPad.up, temp2)
+    branchIfPositive(labels.moveRightPaddleUp, temp2)
 
-        refreshDisplay()
-    returnFromBranch()
+    and(temp, inputs.leftDPad.up, temp2)
+    branchIfPositive(labels.moveLeftPaddleUp, temp2)
+returnFromBranch()
 
+//call here to move the ball, say on a ball update
+label("moveBallUp") //moves ball up
+lShift(ball.yPos, ball.yPos)
+returnFromBranch()
 
+label("moveBallDown") //moves ball down
+rShift(ball.yPos, ball.yPos)
+returnFromBranch()
 
-    //moving the cursor and making sure it doesnt go off the screen
-    label("moveCursorRight")
-        sub(cursor.xPos, displayAsNum[0], temp) //if cursor is at edge of screen
-        jumpIfZero(labels.returnFromBranch, temp) //the break
-        sub(cursor.xPos, 1, cursor.xPos) //else move the cursor right
-    returnFromBranch()
+label("moveBallLeft") //moves ball left
+add(ball.xPos, 1, ball.xPos)
+returnFromBranch()
 
-    label("moveCursorLeft")
-        sub(cursor.xPos, displayAsNum[14], temp)
-        jumpIfZero(labels.returnFromBranch, temp)
-        add(cursor.xPos, 1, cursor.xPos)
-    returnFromBranch()
+label("moveBallRight") //moves ball right
+sub(ball.xPos, 1, ball.xPos)
+returnFromBranch()
 
-    label("moveCursorUp")
-        jumpIfNegative(labels.returnFromBranch, cursor.yPos)
-        lShift(cursor.yPos, cursor.yPos)
-    returnFromBranch()
+//changing ball velocity
+label("bounceBallUp")
+    loadImmidiate(ball.yVel, 1)
+returnFromBranch()
 
-    label("moveCursorDown")
-        sub(cursor.yPos, 1, temp)
-        jumpIfZero(labels.returnFromBranch, temp)
-        rShift(cursor.yPos, cursor.yPos)
-    returnFromBranch()
+label("bounceBallDown")
+    loadImmidiate(ball.yVel, 1000000000000000)
+returnFromBranch()
 
+label("bounceBallLeft")
+    loadImmidiate(ball.xVel, 1)
+returnFromBranch()
 
+label("bounceBallRight")
+    loadImmidiate(ball.xVel, 1000000000000000)
+returnFromBranch()
 
-    //getting cursor inputs and moving it accordingly
-    label("moveCursor")
-        copy(input, oldInput) //gets the old input and puts it into oldInput
-        getInput(input) //capture user input
-        
-        and(input, inputs.leftDPad.right, temp) //if move right, move right
-        branchIfPositive(labels.moveCursorRight, temp)
+//collision with floor and cieling
+label("checkNonPaddleCollision")
+    sub(ball.yPos, 1, temp) //if ball is at the bottom of the screen (bouncing with floor)
+    branchIfZero(labels.bounceBallUp, temp) //then make it move up instead
+    branchIfNegative(labels.bounceBallDown, ball.yPos) //if ball is at top of screen (bouncing with cieling) then make it bounce down
+returnFromBranch()
 
-        and(input, inputs.leftDPad.left, temp) //if move left, move left
-        branchIfPositive(labels.moveCursorLeft, temp)
+//collision with paddles
+label("checkLeftPaddleCollision")
+    and(paddle.left, ball.yPos, temp) //checks if the ball and paddle collide
+    jumpIfZero(labels.gameOver, temp) //if they dont, the games over
+    loadImmidiate(ball.xVel, 1000000000000000) //otherwise the ball will move right
+returnFromBranch()
 
-        and(input, inputs.leftDPad.down, temp) //if move down, move down
-        branchIfPositive(labels.moveCursorDown, temp)
+label("checkRightPaddleCollision")
+    and(paddle.right, ball.yPos, temp) //checks if the ball and paddle collide
+    jumpIfZero(labels.gameOver, temp) //if they dont then the game is over
+    loadImmidiate(ball.xVel, 1) //otherwise set the ball to move left
+returnFromBranch()
 
-        and(input, inputs.leftDPad.up, temp) //if move up, move up
-        branchIfPositive(labels.moveCursorUp, temp)
+//move ball based on current velocity. run this *AFTER* collision checks are done on the ball
+    label("updateBall")
+    branchIfPositive(labels.moveBallUp, ball.yVel) //if the velocity for the ball on the y direction is posotive, move it up
+    branchIfNegative(labels.moveBallDown, ball.yVel) //if the velocity for the ball on the y direction is negative, move it down
+    branchIfPositive(labels.moveBallLeft, ball.xVel) //if the velocity for the ball on the x direction is posotive, move it left (left is posotive and right is negative bc of the way the display addreses are set ip)
+    branchIfNegative(labels.moveBallRight, ball.xVel) //if the velocity for the ball on the x direction is negative, move it left
+returnFromBranch()
 
-    returnFromBranch()
+//render
+label("render")
+    resetFrameBuffer() //resets the frame buffer so the ball doesnt leave a trail
+    loadWritePointer(ball.xPos) //load the xpos (screen adress) to the write pointer to write the ball there
+    copy(ball.yPos, "pointer") //load the ball to the pointer
+    copy(paddle.right, display[0]) //copy right paddle to frame buffer
+    copy(paddle.left, display[14]) //copy left paddle to frame buffer
+    refreshDisplay() //refresh the frame buffer
+returnFromBranch() //return/close function
 
+//main loop
+console.log(assembledInstrucions.length)
+label("loop")
+branch(labels.checkNonPaddleCollision) //checks ball collision with floor and cieling
 
+//checking if paddle collision needs to be checked
+    sub(ball.xPos, 11111110, temp) //if the ball is at the second most left point on the screen
+    branchIfZero(labels.checkLeftPaddleCollision, temp) //if so check left paddle collision
+    sub(ball.xPos, 11110010, temp) //if the ball is at the second most right point of the screen
+    branchIfZero(labels.checkRightPaddleCollision, temp) //if so check right paddle collision
 
-    //changes which file is pointed to by currentImageOffset
-    label("changeFile")
-        and(input, 11110000, temp) //if the file selected is the same, then just return
-        and(oldInput, 11110000, temp2)
-        sub(temp, temp2, temp2)
+    branch(labels.updatePaddle) //updates paddle pos
 
-        jumpIfZero(labels.returnFromBranch, temp2) 
-        //if they *arnt* the same then use do some stuff to turn the input into the pointer to the images location in ram
-
-        add(temp, originalImageOffset, temp) //adds the offset for image location 0 so when you select zero it doesnt overwrite registers
-        sub(temp, 11110001, temp2) //if its pointed at the frame buffer then return (you dont want it to point to the frame buffer)
-        jumpIfZero(labels.returnFromBranch, temp2)
-
-        and(temp, 11111110, temp2) //if the adress overflows and points to registers this detects it and returns
-        jumpIfZero(labels.returnFromBranch, temp2)
-
-        copy(temp, currentImageOffset) //set the current image offset to the new value
-    returnFromBranch()
-    
-    
-    label("writePixel") //writes a pixel into the image at the cursors position
-        
-        and(cursor.xPos, 1111, temp) //gets the 0-15 x cordiante
-        add(temp, currentImageOffset, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
-
-        loadWritePointer(temp) //loads the x coord as a pointer (x coords are actually just memory adresses)
-        loadReadAPointer(temp) //we need to read from here so we can combine the original and modified images
-
-        copy("pointer", temp2) //gets the unmodified image slice into temp2
-
-        or(temp2, cursor.yPos, temp2) //combines them (writes the pixel in the cursors position)
-
-        copy(temp2, "pointer") //writes it back
-
-    returnFromBranch()
-
-
-    label("erasePixel") //ereases a pixel from the image at the cursors position
-
-        and(cursor.xPos, 1111, temp) //gets the 0-15 x cordiante
-        add(temp, currentImageOffset, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
-
-        loadWritePointer(temp) //loads the x coord as a pointer (x coords are actually just memory adresses)
-        loadReadAPointer(temp) //we need to read from here so we can erase only the pixel we want and not the intire slice
-
-        copy("pointer", temp2) //gets the unmodified image slice into temp2
-
-        xor(cursor.yPos, 1111111111111111, temp) //inverts the cursors y pos and saves it into temp so we can use it as a bitmask
-
-        and(temp2, temp, temp2) //uses the bitmask we just made to mask out the pixel we want to erase
-
-        copy(temp2, "pointer") //writes it back
-
-    returnFromBranch()
-
-    //editing the image is handled here
-    label("edit")
-        
-        //checking for if write pixel has been selected
-        and(input, inputs.toggles.four, temp)
-        branchIfPositive(labels.writePixel, temp)
-
-        and(input, inputs.toggles.three, temp)
-        branchIfPositive(labels.erasePixel, temp)
-
-    returnFromBranch()
-
-
-    //render
-    label("render")
-        resetFrameBuffer()
-        loadImmidiate(currentDisplayLine, displayOffset)
-        loadImmidiate(loopCounter, 0)
-        copy(currentImageOffset, currentLine)
-
-
-
-
-        label("renderLoop")
-            loadReadAPointer(currentLine)
-            loadWritePointer(currentDisplayLine)
-
-            copy("pointer", temp2)
-            copy(temp2, "pointer")
-            
-
-            add(currentLine, 1, currentLine)
-            add(loopCounter, 1, loopCounter)
-            add(currentDisplayLine, 1, currentDisplayLine)
-
-            sub(loopCounter, 1111, temp2)
-            jumpIfZero(labels.renderCursor, temp2)
-            jump(labels.renderLoop)
-
-
-    //main
-    label("main")
-        console.log(assembledInstrucions.length) //gets the rom location of the main "function" for the jump instruction after init to go to
-        branch(labels.changeFile) //handles file swapping
-        branch(labels.moveCursor) //handles cursor movement
-        branch(labels.edit) //handels pixel modifications
-        branch(labels.render) //renderes everything to the screen
-
-        jump(labels.main) //loops forever
-
+    branch(labels.updateBall) //moves the ball according to its set velocity
+    branch(labels.render) //renders everything to screen
+    jump(labels.loop) //loops back to the start of the main loop
 
 }
 code() //runs through your asm code and assembles it

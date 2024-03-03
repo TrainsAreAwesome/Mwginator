@@ -17,7 +17,7 @@
     let cursorColour = "1011"
     let oldInput = "1100"
 
-    let displayOffset = 11110000
+    let displayOffset = 11110001
     let originalImageOffset = 10001
 
     //INIT
@@ -30,7 +30,7 @@
     loadImmidiate(currentLine, 0)
     loadImmidiate(currentImageOffset, 10001) //auto loads image 0
     loadImmidiate(cursorColour, 0)
-    jump(1011101) //to current line
+    jump(1011111) //to current line
 
 
     //conditional branch return
@@ -126,8 +126,9 @@
     
     label("writePixel") //writes a pixel into the image at the cursors position
         
-        and(cursor.xPos, 1111, temp) //gets the 0-15 x cordiante
-        add(temp, currentImageOffset, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
+        and(cursor.xPos, 1111, temp) //gets the 1-15 x cordiante
+        sub(currentImageOffset, 1, temp2)
+        add(temp, temp2, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
 
         loadWritePointer(temp) //loads the x coord as a pointer (x coords are actually just memory adresses)
         loadReadAPointer(temp) //we need to read from here so we can combine the original and modified images
@@ -144,7 +145,8 @@
     label("erasePixel") //ereases a pixel from the image at the cursors position
 
         and(cursor.xPos, 1111, temp) //gets the 0-15 x cordiante
-        add(temp, currentImageOffset, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
+        sub(currentImageOffset, 1, temp2)
+        add(temp, temp2, temp) //adds the offset to get the x cord of the cursor if it was in the image stored in ram
 
         loadWritePointer(temp) //loads the x coord as a pointer (x coords are actually just memory adresses)
         loadReadAPointer(temp) //we need to read from here so we can erase only the pixel we want and not the intire slice
@@ -208,4 +210,3 @@
         branch(labels.render) //renderes everything to the screen
 
         jump(labels.main) //loops forever
-
