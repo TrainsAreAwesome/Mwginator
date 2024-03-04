@@ -27,6 +27,8 @@ This computer and its schematics were made for Minecraft 1.18.2 (the version the
 Now copy the file Mwginator.schem and blankRom.schem into the schematics folder in the installation you are using (by default its .minecraft)
 Once you have that done paste the schematic in the world.
 
+### Pasting programmes in the computer in a non MCHPRS world
+
 To run programmes, just transfer the .schematic file into the schematics folder of your installation,
 then go to the location im PasteLocation2.png (PasteLocation1.png will help you find where that is)
 As the sign says, stand on the blue wool and look east, then type `//schem load blankRom`
