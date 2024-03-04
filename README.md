@@ -116,6 +116,7 @@ But what if you want to go back to just after the jump like returning from a fun
 Well thats what the branch instruction is for! Its just like the jump instruction, but if the condition is true (or its uncontitional) it puts the adress of the line it would execute if it hadnt branched on the "call stack"
 This allows you to use a primative version of functions, branch to somewhere, execute some code and return using the returnFromBranch instruction (there is no conditional branch return, but you can do a conditional jump to a branch return to implement it in software)
 But weve had to use ROM adresses to tell the computer where to jump to, and those change, and I havent even told you how to get those!
+Note that the call stack can only hold 15 adresses before overflowing back to the start and causing issues
 
 Thats where labels come in. Define a label like this `label("labelName")` and now you can refer to that label later on in your code like this `jump(labels.labelName)` Note that labels are contained inside the label object
 But you can only jump/branch to a label that is above the jump/branch instruction! Thats why my main functions and loops in the example programmes are at the bottom of the file.
